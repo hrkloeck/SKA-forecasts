@@ -26,6 +26,10 @@ def N_func(z, S_rms, S_area):
     N_ant = total number of antennas
     S_area = observed survey area [sq deg]
     '''
+    #
+    # Yahya et al. MNRAS, 450, 3 2015
+    # https://doi.org/10.1093/mnras/stv695
+    #
     
     if S_rms < 1.:
         c1 = 6.21
@@ -108,5 +112,69 @@ def N_func(z, S_rms, S_area):
 
     #print('Simpson ',Simpson(dN_dz,a,b),'N ',np.array(N).astype(int), A,a,b)
 
+    
+    return np.array(N).astype(int), A
+
+
+def N_func_SAX(z, S_rms, S_area):
+    '''
+    Returns the number of detected HI sources and the lower boundary of the emission line amplitude [𝜇Jy]
+
+    z = observed redshift
+    S_rms = array's noise [𝜇Jy]
+    t_obs = observation time (per pointing) [s]
+    N_ant = total number of antennas
+    S_area = observed survey area [sq deg]
+    '''
+    #
+    # Obreschkow  et al. ApJ, 703, 1890 2009
+    # DOI 10.1088/0004-637X/703/2/1890
+    #
+    # values from Table 1 Peak flux densities for HI
+    
+    if S_rms < 0.01.:
+        c1 = 6.55
+        c2 = 2.54
+        c3 = 1.42
+        A  = .01
+
+    elif 0.01 <= S_rms < 0.1:
+        c1 = 6.87
+        c2 = 2.85
+        c3 = 2.17
+        A  = 0.01
+
+    elif 0.1 <= S_rms < 1:
+        c1 = 6.73
+        c2 = 2.32
+        c3 = 3.09
+        A  = 0.1
+
+    elif 1 <= S_rms < 10:
+        c1 = 5.75
+        c2 = 1.14
+        c3 = 3.95
+        A  = 1
+
+    elif 10 <= S_rms < 100:
+        c1 = 4.56
+        c2 = 0.43
+        c3 = 6.86
+        A  = 10
+
+    elif 100 <= S_rms < 1000:
+        c1 = 6.62
+        c2 = 2.64
+        c3 = 35.49
+        A  = 100
+
+    else: # in case there is too much noise, we consider only 5 sources will be detected
+         return 5, 1000
+        
+    dN_dz = lambda z: 10**c1 * z**c2 * np.exp(-c3*z)
+    a, b = z-.1, z+.1
+    N = Simpson(dN_dz,a,b) * S_area # integration over a bin of 0.2 centered in z
+
+    #print('Simpson ',Simpson(dN_dz,a,b),'N ',np.array(N).astype(int), A,a,b)
     
     return np.array(N).astype(int), A
