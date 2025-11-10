@@ -23,7 +23,7 @@ fwhm_def   = 150E5                       # cm/s (see Obreschkow 2009)
 z_val      = [0.1, 0.2, 0.3, 0.4, 0.5]   # redshifts
 z_eg       = 0.25                        # example redshift
 t_obs_def  = 3600*1                      # s
-Dnu_val    = [1E-3,1E-1,1E0]             # [0.1.285e3, 1e4]              # Hz
+Dnu_val    = [1E-3,1E-2,1E-1]             # [0.1.285e3, 1e4]              # Hz
 S_area_val = [5000,10000,30000]         # sq deg
 
 t_exp_def  = 12                          # yr
@@ -48,11 +48,16 @@ N_ant_def  = 144                         # integer
 
 # === Plot diagram error estimates versus redshift per sky area  ===
 #
-#dvplt.plot_sigmav(z_val, Dnu_val, S_area_val, t_obs_def, N_ant_def, fwhm_def)
+# dvplt.plot_sigmav(z_val, Dnu_val, S_area_val, t_obs_def, N_ant_def, fwhm_def)
 
 # === Plot diagram significane of error estimates/theoretical model versus redshift per sky area  ===
 #
 # dvplt.plot_vsignificance(z_val, Dnu_val, S_area_val, t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def)
+
+# === Plot diagram theoretical model and error estimates(as erros) versus redshift per sky area  ===
+#
+dvplt.plot_vsignificance_as_error(z_val, Dnu_val, S_area_val, t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def)
+
 
 
 def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm):
@@ -75,6 +80,7 @@ def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm): # s, yrs, i
     sigma_v = dvlib.sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm)
     
     return f'\n=== Analysis ===\nRedshift: {z}\nDnu: {Dnu}\nS_area: {S_area}\nExpected drift: {delta_v}\nMeasured Error: {sigma_v}\nFigure of Merit: {FoM} \nUncertainties of H0, q0, j0: {unc}'
+
 
 
 def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm): # s, yrs, integer

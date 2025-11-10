@@ -190,6 +190,43 @@ def plot_vsignificance(z_val, Dnu_val, S_area_val, t_exp, p_LCDM, t_obs, N_ant, 
     fig.tight_layout()
     plt.show()
 
+def plot_vsignificance_as_error(z_val, Dnu_val, S_area_val, t_exp, p_LCDM, t_obs, N_ant, fwhm):
+    '''
+    Creates a panel of plots sigma_v(z) for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
+
+    z_val = values of redshift to calculate ∆v and sigma_v
+    Dnu_val = values of channel width to plot [Hz]
+    S_area_val = values of survey area to plot [sq deg]
+    t_obs = observation time used to calculate sigma_v [s]
+    t_exp = total experiment time used to calulate ∆v [yrs]
+    N_ant = number of antennas used to calculate sigma_v
+    fwhm = HI line width [cm/s]
+    '''
+    n = len(Dnu_val)
+    m = len(S_area_val)
+    fig, ax = plt.subplots(n,m,figsize=(6*m,4*n))
+    
+    Dv = np.array([delta_v_func(z, p_LCDM, t_exp) for z in z_val])
+    
+    for i, Dnu in enumerate(Dnu_val):
+        for j, S_area in enumerate(S_area_val):
+            sigmav = np.array([sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm) for z in z_val])
+            ax[i,j].errorbar(z_val, Dv,sigmav,marker="o",capsize=7)
+            #ax[i,j].set_xlabel('z')
+            #ax[i,j].set_ylabel(r'$\Delta$v theoretical and errors [cm/s]')
+            #ax[i,j].set_ylim([0,6])
+    for i, a in enumerate(ax[:, 0]):
+        a.set_ylabel(f"Dv significance\nDnu = {Dnu_val[i]} Hz", fontsize=12, rotation=90, labelpad=20, va='center')
+        
+    for i, a in enumerate(ax[-1,:]):
+        a.set_xlabel('redshift z')
+
+    for j, a in enumerate(ax[0]):
+        a.set_title(f"S_area = {S_area_val[j]} sq deg", fontsize=12)
+
+        
+    fig.tight_layout()
+    plt.show()
     
 def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_exp, p_LCDM, t_obs, N_ant, fwhm, N=100):
     '''
