@@ -216,7 +216,7 @@ def plot_vsignificance_as_error(z_val, Dnu_val, S_area_val, t_exp, p_LCDM, t_obs
             #ax[i,j].set_ylabel(r'$\Delta$v theoretical and errors [cm/s]')
             #ax[i,j].set_ylim([0,6])
     for i, a in enumerate(ax[:, 0]):
-        a.set_ylabel(f"Dv significance\nDnu = {Dnu_val[i]} Hz", fontsize=12, rotation=90, labelpad=20, va='center')
+        a.set_ylabel(f"$Dv \pm \Delta Dv$ \n [Dnu = {Dnu_val[i]} Hz]", fontsize=12, rotation=90, labelpad=20, va='center')
         
     for i, a in enumerate(ax[-1,:]):
         a.set_xlabel('redshift z')
