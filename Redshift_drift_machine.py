@@ -73,18 +73,7 @@ def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
     return F, fmlib.FoM(F, 1, 2), fmlib.unc(F), delta_v(p_LCDM), sigma_v # Fisher Matrix, Figure of Merit between q0 and j0 and uncertainties
 
 
-def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None): # t_obs in s, t_exp in yrs, Dnu in Hz, S_area in sq deg and fwhm in cm/s
-
-    FMANA = analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)
-    FoM     = FMANA[1]
-    unc     = FMANA[2]
-    delta_v = FMANA[3]
-    sigma_v = FMANA[4]
-    
-    return f'\n=== Analysis ===\nRedshift: {z}\nDnu: {Dnu}\nS_area: {S_area}\nExpected drift: {delta_v}\nMeasured Error: {sigma_v}\nFigure of Merit: {FoM} \nUncertainties of H0, q0, j0: {unc}'
-
-
-def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, doplot=False):
+def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, doplot=False): # t_obs in s, t_exp in yrs, Dnu in Hz, S_area in sq deg and fwhm in cm/s
     z1 = np.array([.3])
     z2 = np.array([.3, .5])
     z3 = np.array([.1, .3, .5])
@@ -122,6 +111,3 @@ best_area   = best_values[0][1]
 
 print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
 print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline))
-
-
-# ELLIPSES WITH ONLY ONE REDSHIFT ARE TOO BIG, IT IS NEEDED TO DO THEM WITH ALL 3 BINS
