@@ -1,8 +1,7 @@
-Hi I have tried to figure it out .
+To clone:
+```git clone git@github.com:liviagtoliveira/SKA-forecasts.git```
 
-```git clone git@github.com:hrkloeck/SKA-forecasts.git```
-
-use a editor to edit the Redshift_drift_machine.py file
-
-to run it do:
+To run:
 ```python Redshift_drift_machine.py```
+
+It is possible to edit Redshift_drift_machine.py and do other plots/prints
