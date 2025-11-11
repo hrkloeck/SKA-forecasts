@@ -25,13 +25,14 @@ def partial(ff, k, p, H=1e-6):
     
     return (ff(sup) - ff(inf)) / H
 
-def Fisher_matrix(p, ffs, sigmas):
+def Fisher_matrix(p, ffs, sigmas, priors=None):
     '''
     Returns the Fisher matrix of a model
     
     p      = list of model parameters
     ffs    = array of the functions that describe the observables
     sigmas = array of the Gaussian errors of the observables
+    priors = array of the priors to be used (same length and order as p)
     '''
 
     m = len(p)
@@ -42,29 +43,17 @@ def Fisher_matrix(p, ffs, sigmas):
 
             part_i, part_j = np.vectorize(lambda ff: partial(ff,i,p)), np.vectorize(lambda ff: partial(ff,j,p))
             F[i,j] = np.sum((part_i(ffs) * part_j(ffs)) / sigmas**2) # calculates each entry
-
-    return F
-
-def Fisher_matrix_wPriors(p, ffs, sigmas, priors):
-    '''
-    Returns the Fisher matrix of a model with separate priors
     
-    p = list of model parameters
-    ffs = array of the functions that describe the observables
-    sigmas = array of the Gaussian errors of the observables
-    priors = array of the priors to be used (same length and order as p)
-    '''
+    if priors is None or np.all(priors==0):
+        return F
     
-    F = Fisher_matrix(p, ffs, sigmas)
-    
-    D = np.zeros_like(priors, dtype = float)
-    mask = priors != 0
-    D[mask] = priors[mask]**-2
-    F_priors = np.diag(D) # creates a diagonal matrix with the priors
+    else:
+        D = np.zeros_like(priors, dtype = float)
+        mask = priors != 0
+        D[mask] = priors[mask]**-2
+        F_priors = np.diag(D) # creates a diagonal matrix with the priors
 
-    F += F_priors # adds priors to initial matrix
-
-    return F
+        return F + F_priors # adds priors to initial matrix
 
 def cov_matrix(F):
     '''
@@ -100,14 +89,14 @@ def rho(F, i, j):
 
     return rho
 
-def ellipse(F, i, j, delta_chi2=2.3):
+def ellipse(F, i, j):
 
     '''
     Returns the axes and the angle from the x-axis of the confidence ellipse of parameters i and j
 
     F = Fisher matrix of the model
     i, j = indexes of the parameters for which to calculate the correlation coefficient
-    delta_csi2 = confidence interval of interest
+    delta_chi2 = confidence interval of interest
     '''
 
     C = cov_matrix(F)
@@ -133,11 +122,11 @@ def FoM(F, i, j, delta_chi2=2.3):
     delta_chi2 = confidence interval of interest
     '''
 
-    ai, aj, angle = ellipse(F, i, j, delta_chi2)
+    ai, aj = ellipse(F, i, j)[:2]
     
     return 1 / (ai * aj * delta_chi2)
 
-def draw_ellipse(F, i, j, delta_chi2=2.3, center=(0, 0), **kwargs):
+def draw_ellipse(F, i, j, delta_chi2=2.3, center=(0, 0), ax=None, **kwargs):
     '''
     Returns the confidence ellipse of p_i (x) and p_j (y)
     
@@ -146,14 +135,21 @@ def draw_ellipse(F, i, j, delta_chi2=2.3, center=(0, 0), **kwargs):
     delta_chi2 = confidence interval of interest
     **kwargs = specifications of the ellipse
     '''
-    ai, aj, angle = ellipse(F, i, j, delta_chi2)
+    ai, aj, angle = ellipse(F, i, j)
     
     theta = np.linspace(0, 2*np.pi, 200) # ellipse
-    x = ai * np.cos(theta)
-    y = aj * np.sin(theta)
+    x = ai * np.cos(theta) * delta_chi2
+    y = aj * np.sin(theta) * delta_chi2
 
     x_rot = center[0] + x * np.cos(angle) - y * np.sin(angle) # rotation
     y_rot = center[1] + x * np.sin(angle) + y * np.cos(angle)
 
-    plt.plot(x_rot, y_rot, **kwargs)
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+    
+    ax.plot(x_rot, y_rot, **kwargs)
+    return fig, ax
+
 

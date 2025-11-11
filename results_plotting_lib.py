@@ -6,6 +6,7 @@ np.set_printoptions(linewidth=np.inf)
 
 from redshiftdrift_lib import *
 from telescope_lib import *
+from Fisher_matrix_lib import *
 
 
 def plot_Nz(z_val, Dnu_val, S_area_val, t_obs, N_ant):
@@ -125,7 +126,7 @@ def im_sigmav(z_eg, Dnu_range, S_area_range, t_obs, N_ant, fwhm,doprtinfo=False,
         return [Dnu_val[ind_min[0]],S_area_val[ind_min[1]],arr[ind_min]],[Dnu_val[ind_max[0]],S_area_val[ind_max[1]],arr[ind_max]]
         
 
-def plot_Dv(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm):
+def plot_Dv(z_val, Dnu_val, S_area_val, t_obs, t_exp, p, N_ant, fwhm):
     '''
     Creates a panel of plots ∆v(z) for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
 
@@ -140,7 +141,7 @@ def plot_Dv(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm):
     n = len(Dnu_val)
     m = len(S_area_val)
     fig, ax = plt.subplots(n,m,figsize=(6*m,4*n))
-    Dv = [delta_v_func(z, p_LCDM, t_exp) for z in z_val]
+    Dv = [delta_v_func(z, p, t_exp) for z in z_val]
     
     for i, Dnu in enumerate(Dnu_val):
         for j, S_area in enumerate(S_area_val):
@@ -191,20 +192,21 @@ def plot_vsignificance(z_val, Dnu_val, S_area_val, t_exp, p_LCDM, t_obs, N_ant, 
     plt.show()
 
     
-def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_exp, p_LCDM, t_obs, N_ant, fwhm, N=100):
+def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_exp, p, t_obs, N_ant, fwhm, N=100):
     '''
     Creates an image of v significance values for different channel widths and survey areas
 
     z_eg = redshift used to calculate ∆v and sigma_v
     Dnu_min, Dnu_max = limits of channel width [Hz]
     S_area_min, S_area_max = limits of survey area [sq deg]
-    t_obs = observation time used to calculate sigma_v [s]
     t_exp = total experiment time used to calulate ∆v [yrs]
+    p = array of H0, q0, j0 values
+    t_obs = observation time used to calculate sigma_v [s]
     N_ant = number of antennas used to calculate sigma_v
     fwhm = HI line width [cm/s]
     N = number of points in Dnu and S_area to create image
     '''
-    Dv          = delta_v_func(z_eg, p_LCDM, t_exp)
+    Dv          = delta_v_func(z_eg, p, t_exp)
     Dnu_val     = np.linspace(Dnu_min, Dnu_max, N)
     S_area_val  = np.linspace(S_area_min, S_area_max, N)
     arr         = np.zeros((N,N), dtype=float)
@@ -221,4 +223,46 @@ def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_exp, p_LC
     cbar = plt.colorbar(im, ax=ax, label=r'$\Delta$v significance')
     ax.set_xlabel(r'$S_{area}$ [sq deg]')
     ax.set_ylabel(r'$\Delta \nu$ [Hz]')
+    plt.show()
+
+
+def plot_ellipses(z_val, Dnu_val, S_area_val, t_exp, p, t_obs, N_ant, fwhm, priors=None, savefig=False):
+    '''
+    Creates a panel of confidence ellipses for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
+
+    z_val = values of redshift to calculate ∆v and sigma_v
+    Dnu_val = values of channel width to plot [Hz]
+    S_area_val = values of survey area to plot [sq deg]
+    t_exp = total experiment time used to calulate ∆v [yrs]
+    p = array of H0, q0, j0 values
+    t_obs = observation time used to calculate sigma_v [s]
+    N_ant = number of antennas used to calculate sigma_v
+    fwhm = HI line width [cm/s]
+    priors = array of the priors to be used (same length and order as p)
+    '''
+    n = len(Dnu_val)
+    m = len(S_area_val)
+    fig, ax = plt.subplots(n,m,figsize=(6*m,4*n), sharex=True, sharey=True)
+
+    for i, Dnu in enumerate(Dnu_val):
+        for j, S_area in enumerate(S_area_val):
+            sigma_v_vect = np.vectorize(lambda z_i: sigma_v_func(z_i, t_obs, N_ant, Dnu, S_area, fwhm))
+            sigma_v = sigma_v_vect(z_val)
+            delta_v = lambda p: delta_v_func(z_val, p, t_exp)
+            F = Fisher_matrix(p, delta_v, sigma_v, priors)
+            draw_ellipse(F, 1, 2, delta_chi2=2.3, center=(p[1], p[2]), ax=ax[i,j], label=r'1$\sigma$')
+            draw_ellipse(F, 1, 2, delta_chi2=6.17, center=(p[1], p[2]), ax=ax[i,j], label=r'2$\sigma$')
+            draw_ellipse(F, 1, 2, delta_chi2=11.8, center=(p[1], p[2]), ax=ax[i,j], label=r'3$\sigma$')
+            ax[i,j].legend()
+
+    for i, a in enumerate(ax[:, 0]):
+        a.set_ylabel(f"$j_0$\n[Dnu = {Dnu_val[i]} Hz]")
+    for j, a in enumerate(ax[0]):
+        a.set_title(f"S_area = {S_area_val[j]} sq deg")
+    for j, a in enumerate(ax[-1]):
+        a.set_xlabel(f"$q_0$")
+
+    fig.tight_layout()
+    if savefig:
+        fig.savefig('../ellipses.png')
     plt.show()

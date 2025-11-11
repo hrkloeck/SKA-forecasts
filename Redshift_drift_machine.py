@@ -4,14 +4,14 @@
 #
 #
 import numpy as np
-import sys
+import matplotlib.pyplot as plt
 
 import results_plotting_lib as dvplt
 import redshiftdrift_lib as dvlib
 import Fisher_matrix_lib as fmlib
 
 p_LCDM  = np.array([70., -.55, 1.]) # H0, q0, j0
-priors_baseline = np.array([67.4, 0., 0.])
+priors_baseline = np.array([10., 0., 0.]) # prior on H0
 
 #
 #  Here start the playing around
@@ -25,7 +25,7 @@ Dnu_val    = [1E-3,1E-2,1E-1]             # [0.1.285e3, 1e4]              # Hz
 S_area_val = [5000,10000,30000]          # sq deg
 
 t_exp_def  = 12                          # yr
-N_ant_def  = 197                         # integer
+N_ant_def  = 144                         # integer
 
 
 # === Plot number counts ===
@@ -48,106 +48,68 @@ N_ant_def  = 197                         # integer
 #
 #dvplt.plot_sigmav(z_val, Dnu_val, S_area_val, t_obs_def, N_ant_def, fwhm_def)
 
-# === Plot diagram significane of error estimates/theoretical model versus redshift per sky area  ===
+# === Plot diagram significance of error estimates/theoretical model versus redshift per sky area  ===
 #
 #dvplt.plot_vsignificance(z_val, Dnu_val, S_area_val, t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def)
 
 
-def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm):
+# === Plot diagram theoretical model redshiftdrifts and uncertainties versus redshift per sky area  ===
+#
+#dvplt.plot_Dv(z_val, Dnu_val, S_area_val, t_obs_def, t_exp_def, p_LCDM, N_ant_def, fwhm_def)
+
+
+# === Plot confidence ellipses  ===
+#
+dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def, priors_baseline, savefig=True)
+
+
+def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
     
     sigma_v_vect = np.vectorize(lambda z_i: dvlib.sigma_v_func(z_i, t_obs, N_ant, Dnu, S_area, fwhm))
     sigma_v = sigma_v_vect(z)
     delta_v = lambda p: dvlib.delta_v_func(z, p, t_exp)
 
-    F = fmlib.Fisher_matrix(p_LCDM, delta_v, sigma_v)
+    F = fmlib.Fisher_matrix(p_LCDM, delta_v, sigma_v, priors)
     
-    return fmlib.FoM(F, 1, 2), fmlib.unc(F) # Figure of Merit between q0 and j0 and uncertainties
+    return F, fmlib.FoM(F, 1, 2), fmlib.unc(F), delta_v(p_LCDM), sigma_v # Fisher Matrix, Figure of Merit between q0 and j0 and uncertainties
 
 
-def analysis_FoM_wPriors(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors):
-    
-    sigma_v_vect = np.vectorize(lambda z_i: dvlib.sigma_v_func(z_i, t_obs, N_ant, Dnu, S_area, fwhm))
-    sigma_v = sigma_v_vect(z)
-    delta_v = lambda p: dvlib.delta_v_func(z, p, t_exp)
+def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None): # t_obs in s, t_exp in yrs, Dnu in Hz, S_area in sq deg and fwhm in cm/s
 
-    F = fmlib.Fisher_matrix_wPriors(p_LCDM, delta_v, sigma_v, priors)
-    
-    return fmlib.FoM(F, 1, 2), fmlib.unc(F) # Figure of Merit between q0 and j0 and uncertainties
-
-
-def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm): # s, yrs, integer
-
-    FMANA = analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm)
-    FoM   = FMANA[0]
-    unc   = FMANA[1]
-
-    delta_v = dvlib.delta_v_func(z, p_LCDM, t_exp)
-    sigma_v = dvlib.sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm)
+    FMANA = analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)
+    FoM     = FMANA[1]
+    unc     = FMANA[2]
+    delta_v = FMANA[3]
+    sigma_v = FMANA[4]
     
     return f'\n=== Analysis ===\nRedshift: {z}\nDnu: {Dnu}\nS_area: {S_area}\nExpected drift: {delta_v}\nMeasured Error: {sigma_v}\nFigure of Merit: {FoM} \nUncertainties of H0, q0, j0: {unc}'
 
 
-def hrk_analysis_results_wPriors(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors): # s, yrs, integer
-
-    FMANA = analysis_FoM_wPriors(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)
-    FoM   = FMANA[0]
-    unc   = FMANA[1]
-
-    delta_v = dvlib.delta_v_func(z, p_LCDM, t_exp)
-    sigma_v = dvlib.sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm)
-    
-    return f'\n=== Analysis with priors ===\nRedshift: {z}\nDnu: {Dnu}\nS_area: {S_area}\nExpected drift: {delta_v}\nMeasured Error: {sigma_v}\nFigure of Merit: {FoM} \nUncertainties of H0, q0, j0: {unc}'
-
-
-def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm): # s, yrs, integer
+def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, doplot=False):
     z1 = np.array([.3])
     z2 = np.array([.3, .5])
     z3 = np.array([.1, .3, .5])
 
+    z_bins  = [z1, z2, z3]
+    F       = [analysis_FoM(z_i, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[0] for z_i in z_bins]
+    FoM     = [analysis_FoM(z_i, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[1] for z_i in z_bins]
+    unc     = [analysis_FoM(z_i, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[2] for z_i in z_bins]
+    delta_v = [analysis_FoM(z_i, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[3] for z_i in z_bins]
+    sigma_v = [analysis_FoM(z_i, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[4] for z_i in z_bins]
+    i       = np.argmax(FoM)
 
+    if doplot:
+        fig, ax = plt.subplots()
+        fmlib.draw_ellipse(F[i], 1, 2, delta_chi2=2.3, center=(p_LCDM[1], p_LCDM[2]), ax=ax, label=r'1$\sigma$')
+        fmlib.draw_ellipse(F[i], 1, 2, delta_chi2=6.17, center=(p_LCDM[1], p_LCDM[2]), ax=ax, label=r'2$\sigma$')
+        fmlib.draw_ellipse(F[i], 1, 2, delta_chi2=11.8, center=(p_LCDM[1], p_LCDM[2]), ax=ax, label=r'3$\sigma$')
+        ax.legend()
+        ax.set_xlabel(r'$q_0$')
+        ax.set_ylabel(r'$j_0$')
+        plt.show()
+
+    return f'\n=== Analysis ===\nPriors: {priors}\nDnu: {Dnu}\nS_area: {S_area}\nArray of redshifts: {z_bins[i]}\nExpected drift: {delta_v[i]}\nMeasured Error: {sigma_v[i]}\nFigure of Merit (1 sigma): {FoM[1]} \nUncertainties of H0, q0, j0: {unc[1]}'    
     
-    #sys.exit(-1)
-    FoM = np.array([analysis_FoM(z1, t_obs, t_exp, N_ant, Dnu, S_area, fwhm)[0],
-                    analysis_FoM(z2, t_obs/2, t_exp, N_ant, Dnu, S_area, fwhm)[0],
-                    analysis_FoM(z3, t_obs/3, t_exp, N_ant, Dnu, S_area, fwhm)[0]])
-
-    unc = np.array([analysis_FoM(z1, t_obs, t_exp, N_ant, Dnu, S_area, fwhm)[1],
-                    analysis_FoM(z2, t_obs/2, t_exp, N_ant, Dnu, S_area, fwhm)[1],
-                    analysis_FoM(z3, t_obs/3, t_exp, N_ant, Dnu, S_area, fwhm)[1]])
-    i   = np.argmax(FoM)
-
-    if i == 0:
-        return f'\n=== Analysis ===\nArray of redshifts: {z1}\nFigure of Merit: {FoM[0]} \nUncertainties of H0, q0, j0: {unc[0]}'
-    if i == 1:
-        return f'\n=== Analysis ===\nArray of redshifts: {z2}\nFigure of Merit: {FoM[1]} \nUncertainties of H0, q0, j0: {unc[1]}'
-    if i == 2:
-        return f'\n=== Analysis ===\nArray of redshifts: {z3}\nFigure of Merit: {FoM[2]} \nUncertainties of H0, q0, j0: {unc[2]}'
-    
-
-def analysis_wPriors(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors): # s, yrs, integer
-    z1 = np.array([.3])
-    z2 = np.array([.3, .5])
-    z3 = np.array([.1, .3, .5])
-
-
-    
-    #sys.exit(-1)
-    FoM = np.array([analysis_FoM_wPriors(z1, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[0],
-                    analysis_FoM_wPriors(z2, t_obs/2, t_exp, N_ant, Dnu, S_area, fwhm, priors)[0],
-                    analysis_FoM_wPriors(z3, t_obs/3, t_exp, N_ant, Dnu, S_area, fwhm, priors)[0]])
-
-    unc = np.array([analysis_FoM_wPriors(z1, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)[1],
-                    analysis_FoM_wPriors(z2, t_obs/2, t_exp, N_ant, Dnu, S_area, fwhm, priors)[1],
-                    analysis_FoM_wPriors(z3, t_obs/3, t_exp, N_ant, Dnu, S_area, fwhm, priors)[1]])
-    i   = np.argmax(FoM)
-
-    if i == 0:
-        return f'\n=== Analysis with priors ===\nArray of redshifts: {z1}\nFigure of Merit: {FoM[0]} \nUncertainties of H0, q0, j0: {unc[0]}'
-    if i == 1:
-        return f'\n=== Analysis with priors ===\nArray of redshifts: {z2}\nFigure of Merit: {FoM[1]} \nUncertainties of H0, q0, j0: {unc[1]}'
-    if i == 2:
-        return f'\n=== Analysis with priors ===\nArray of redshifts: {z3}\nFigure of Merit: {FoM[2]} \nUncertainties of H0, q0, j0: {unc[2]}'
-
 
 #
 # === First attemp to do the analyis ===
@@ -158,8 +120,9 @@ best_values = dvplt.im_sigmav(z_eg, Dnu_val, S_area_val, t_obs_def, N_ant_def, f
 best_dnu    = best_values[0][0]
 best_area   = best_values[0][1]
 
-print(hrk_analysis_results(z_eg, t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
-print(hrk_analysis_results_wPriors(z_eg, t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline))
-print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
-print(analysis_wPriors(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline))
 
+print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
+print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline))
+
+
+# ELLIPSES WITH ONLY ONE REDSHIFT ARE TOO BIG, IT IS NEEDED TO DO THEM WITH ALL 3 BINS
