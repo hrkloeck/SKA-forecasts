@@ -46,13 +46,14 @@ def plot_sigmav(z_val, Dnu_val, S_area_val, t_obs, N_ant, fwhm):
     '''
     Creates a panel of plots sigma_v(z) for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
 
-    z_val = values of redshift to calculate sigma_v
-    Dnu_val = values of channel width to plot [Hz]
+    z_val      = values of redshift to calculate sigma_v
+    Dnu_val    = values of channel width to plot [Hz]
     S_area_val = values of survey area to plot [sq deg]
-    t_obs = observation time used to calculate sigma_v [s]
-    N_ant = number of antennas used to calculate sigma_v
-    fwhm = HI line width [cm/s]
+    t_obs      = observation time used to calculate sigma_v [s]
+    N_ant      = number of antennas used to calculate sigma_v
+    fwhm       = HI line width [cm/s]
     '''
+
     n = len(Dnu_val)
     m = len(S_area_val)
     fig, ax = plt.subplots(n,m,figsize=(6*m,4*n))
@@ -61,21 +62,22 @@ def plot_sigmav(z_val, Dnu_val, S_area_val, t_obs, N_ant, fwhm):
         for j, S_area in enumerate(S_area_val):
             sigmav = [sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm) for z in z_val]
             ax[i,j].scatter(z_val, sigmav)
-            ax[i,j].set_xlabel('z')
-            ax[i,j].set_ylabel(r'$\sigma_v$ (cm/s)')
 
     for i, a in enumerate(ax[:, 0]):
-        a.set_ylabel(f"sigma_v (cm/s)\nDnu = {Dnu_val[i]} Hz", fontsize=12, rotation=0, labelpad=50, va='center')
+        a.set_ylabel(f"sigma_v (cm/s)\n[Dnu = {Dnu_val[i]} Hz]")
     for j, a in enumerate(ax[0]):
-        a.set_title(f"S_area = {S_area_val[j]} sq deg", fontsize=12)
+        a.set_title(f"S_area = {S_area_val[j]} sq deg")
+    for j, a in enumerate(ax[-1]):
+        a.set_xlabel(f"redshift z")
 
     fig.tight_layout()
     plt.show()
 
 
-def im_sigmav(z_eg, Dnu_range, S_area_range, t_obs, N_ant, fwhm,doprtinfo=False,doplot=True):
+def im_sigmav(z_eg, Dnu_range, S_area_range, t_obs, N_ant, fwhm, doprtinfo=False, doplot=True):
     '''
-    Creates an image of sigma_v values for different channel widths and survey areas
+    Creates an image of sigma_v values for different channel widths and survey areas if doplot=True
+    Otherwise, returns the values of Dnu, S_area and sigma_v for which sigma_v is minimum and maximum
 
     z_eg         = redshift used to calculate sigma_v
     Dnu_range    = channel width [Hz]
@@ -83,7 +85,10 @@ def im_sigmav(z_eg, Dnu_range, S_area_range, t_obs, N_ant, fwhm,doprtinfo=False,
     t_obs        = observation time used to calculate sigma_v [s]
     N_ant        = number of antennas used to calculate sigma_v
     fwhm         = HI line width [cm/s]
+    doprtinfo    = print information of sigma_v and input parameters
+    doplot       = plot the image of sigma_v
     '''
+
     if len(Dnu_range) == len(S_area_range):
         Dnu_val    = Dnu_range
         S_area_val = S_area_range
@@ -126,18 +131,20 @@ def im_sigmav(z_eg, Dnu_range, S_area_range, t_obs, N_ant, fwhm,doprtinfo=False,
         return [Dnu_val[ind_min[0]],S_area_val[ind_min[1]],arr[ind_min]],[Dnu_val[ind_max[0]],S_area_val[ind_max[1]],arr[ind_max]]
         
 
-def plot_Dv(z_val, Dnu_val, S_area_val, t_obs, t_exp, p, N_ant, fwhm):
+def plot_Dv(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p):
     '''
     Creates a panel of plots ∆v(z) for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
 
-    z_val = values of redshift to calculate ∆v
-    Dnu_val = values of channel width to plot [Hz]
+    z_val      = values of redshift to calculate ∆v
+    Dnu_val    = values of channel width to plot [Hz]
     S_area_val = values of survey area to plot [sq deg]
-    t_obs = observation time used to calculate ∆v [s]
-    t_exp = total experiment time [yrs]
-    N_ant = number of antennas used to calculate ∆v
-    fwhm = HI line width [cm/s]
+    t_obs      = observation time used to calculate ∆v [s]
+    t_exp      = total experiment time [yrs]
+    N_ant      = number of antennas used to calculate ∆v
+    fwhm       = HI line width [cm/s]
+    p          = array of H0, q0, j0 values
     '''
+
     n = len(Dnu_val)
     m = len(S_area_val)
     fig, ax = plt.subplots(n,m,figsize=(6*m,4*n))
@@ -147,65 +154,68 @@ def plot_Dv(z_val, Dnu_val, S_area_val, t_obs, t_exp, p, N_ant, fwhm):
         for j, S_area in enumerate(S_area_val):
             sigmav = [sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm) for z in z_val]
             ax[i,j].errorbar(z_val, Dv, yerr=sigmav, fmt='.')
-            ax[i,j].set_xlabel('z')
-            ax[i,j].set_ylabel(r'$\Delta$v (cm/s)')
 
     for i, a in enumerate(ax[:, 0]):
-        a.set_ylabel(f"Dv (cm/s)\nDnu = {Dnu_val[i]} Hz", fontsize=12, rotation=0, labelpad=50, va='center')
+        a.set_ylabel(f"Dv (cm/s)\n[Dnu = {Dnu_val[i]} Hz]")
     for j, a in enumerate(ax[0]):
-        a.set_title(f"S_area = {S_area_val[j]} sq deg", fontsize=12)
+        a.set_title(f"S_area = {S_area_val[j]} sq deg")
+    for j, a in enumerate(ax[-1]):
+        a.set_xlabel(f"redshift z")
 
     fig.tight_layout()
     plt.show()
 
 
-def plot_vsignificance(z_val, Dnu_val, S_area_val, t_exp, p_LCDM, t_obs, N_ant, fwhm):
+def plot_vsignificance(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p):
     '''
     Creates a panel of plots sigma_v(z) for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
 
-    z_val = values of redshift to calculate ∆v and sigma_v
-    Dnu_val = values of channel width to plot [Hz]
+    z_val.     = values of redshift to calculate ∆v and sigma_v
+    Dnu_val    = values of channel width to plot [Hz]
     S_area_val = values of survey area to plot [sq deg]
-    t_obs = observation time used to calculate sigma_v [s]
-    t_exp = total experiment time used to calulate ∆v [yrs]
-    N_ant = number of antennas used to calculate sigma_v
-    fwhm = HI line width [cm/s]
+    t_obs      = observation time used to calculate sigma_v [s]
+    t_exp      = total experiment time used to calulate ∆v [yrs]
+    N_ant      = number of antennas used to calculate sigma_v
+    fwhm       = HI line width [cm/s]
+    p          = array of H0, q0, j0 values
     '''
+
     n = len(Dnu_val)
     m = len(S_area_val)
     fig, ax = plt.subplots(n,m,figsize=(6*m,4*n))
-    Dv = np.array([delta_v_func(z, p_LCDM, t_exp) for z in z_val])
+    Dv = np.array([delta_v_func(z, p, t_exp) for z in z_val])
     
     for i, Dnu in enumerate(Dnu_val):
         for j, S_area in enumerate(S_area_val):
             sigmav = np.array([sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm) for z in z_val])
             ax[i,j].scatter(z_val, Dv/sigmav)
-            ax[i,j].set_xlabel('z')
-            ax[i,j].set_ylabel(r'$\Delta$v significance')
 
     for i, a in enumerate(ax[:, 0]):
-        a.set_ylabel(f"Dv significance\nDnu = {Dnu_val[i]} Hz", fontsize=12, rotation=0, labelpad=50, va='center')
+        a.set_ylabel(f"Dv significance\n[Dnu = {Dnu_val[i]} Hz]")
     for j, a in enumerate(ax[0]):
-        a.set_title(f"S_area = {S_area_val[j]} sq deg", fontsize=12)
+        a.set_title(f"S_area = {S_area_val[j]} sq deg")
+    for j, a in enumerate(ax[-1]):
+        a.set_xlabel(f"redshift z")
 
     fig.tight_layout()
     plt.show()
 
     
-def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_exp, p, t_obs, N_ant, fwhm, N=100):
+def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_obs, t_exp, N_ant, fwhm, p, N=100):
     '''
     Creates an image of v significance values for different channel widths and survey areas
 
-    z_eg = redshift used to calculate ∆v and sigma_v
-    Dnu_min, Dnu_max = limits of channel width [Hz]
+    z_eg                   = redshift used to calculate ∆v and sigma_v
+    Dnu_min, Dnu_max       = limits of channel width [Hz]
     S_area_min, S_area_max = limits of survey area [sq deg]
-    t_exp = total experiment time used to calulate ∆v [yrs]
-    p = array of H0, q0, j0 values
-    t_obs = observation time used to calculate sigma_v [s]
-    N_ant = number of antennas used to calculate sigma_v
-    fwhm = HI line width [cm/s]
-    N = number of points in Dnu and S_area to create image
+    t_obs                  = observation time used to calculate sigma_v [s]
+    t_exp                  = total experiment time used to calulate ∆v [yrs]
+    N_ant                  = number of antennas used to calculate sigma_v
+    fwhm                   = HI line width [cm/s]
+    p                      = array of H0, q0, j0 values
+    N                      = number of points in Dnu and S_area to create image
     '''
+
     Dv          = delta_v_func(z_eg, p, t_exp)
     Dnu_val     = np.linspace(Dnu_min, Dnu_max, N)
     S_area_val  = np.linspace(S_area_min, S_area_max, N)
@@ -226,20 +236,21 @@ def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_exp, p, t
     plt.show()
 
 
-def plot_ellipses(z_val, Dnu_val, S_area_val, t_exp, p, t_obs, N_ant, fwhm, priors=None, savefig=False):
+def plot_ellipses(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p, priors=None, savefig=False):
     '''
     Creates a panel of confidence ellipses for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
 
-    z_val = values of redshift to calculate ∆v and sigma_v
-    Dnu_val = values of channel width to plot [Hz]
+    z_val      = values of redshift to calculate ∆v and sigma_v
+    Dnu_val    = values of channel width to plot [Hz]
     S_area_val = values of survey area to plot [sq deg]
-    t_exp = total experiment time used to calulate ∆v [yrs]
-    p = array of H0, q0, j0 values
-    t_obs = observation time used to calculate sigma_v [s]
-    N_ant = number of antennas used to calculate sigma_v
-    fwhm = HI line width [cm/s]
-    priors = array of the priors to be used (same length and order as p)
+    t_obs      = observation time used to calculate sigma_v [s]
+    t_exp      = total experiment time used to calulate ∆v [yrs]
+    N_ant      = number of antennas used to calculate sigma_v
+    fwhm       = HI line width [cm/s]
+    p          = array of H0, q0, j0 values
+    priors     = array of the priors to be used (same length and order as p)
     '''
+    
     n = len(Dnu_val)
     m = len(S_area_val)
     fig, ax = plt.subplots(n,m,figsize=(6*m,4*n), sharex=True, sharey=True)

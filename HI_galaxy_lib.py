@@ -5,9 +5,9 @@ def Simpson(ff, a, b, N=100):
     '''
     Returns the integral of a function between a and b
 
-    ff = function to be integrated
+    ff   = function to be integrated
     a, b = limits of integration
-    N = number of steps
+    N    = number of steps
     '''
     
     h = (b-a)/N
@@ -20,10 +20,8 @@ def N_func(z, S_rms, S_area):
     '''
     Returns the number of detected HI sources and the lower boundary of the emission line amplitude [𝜇Jy]
 
-    z = observed redshift
-    S_rms = array's noise [𝜇Jy]
-    t_obs = observation time (per pointing) [s]
-    N_ant = total number of antennas
+    z      = observed redshift
+    S_rms  = array's noise [𝜇Jy]
     S_area = observed survey area [sq deg]
     '''
     #
@@ -120,10 +118,8 @@ def N_func_SAX(z, S_rms, S_area):
     '''
     Returns the number of detected HI sources and the lower boundary of the emission line amplitude [𝜇Jy]
 
-    z = observed redshift
-    S_rms = array's noise [𝜇Jy]
-    t_obs = observation time (per pointing) [s]
-    N_ant = total number of antennas
+    z      = observed redshift
+    S_rms  = array's noise [𝜇Jy]
     S_area = observed survey area [sq deg]
     '''
     #

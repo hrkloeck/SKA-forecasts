@@ -3,20 +3,17 @@
 # This is based on the stuff from Carlos and Livia
 #
 #
-import math
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-np.set_printoptions(linewidth=np.inf)
 
 def partial(ff, k, p, H=1e-6):
     '''
     Returns the partial derivative of a function
     
     ff = function to be differentiated
-    k = index of the variable with respect to which the derivative is taken
-    p = point where to calculate the derivative
-    H = approximation step size
+    k  = index of the variable with respect to which the derivative is taken
+    p  = point where to calculate the derivative
+    H  = approximation step size
     '''
     
     inf,sup = np.copy(p),np.copy(p) # points where to calculate ff
@@ -24,6 +21,7 @@ def partial(ff, k, p, H=1e-6):
     sup[k] += H/2 # (..., x_i + H/2, ...)
     
     return (ff(sup) - ff(inf)) / H
+
 
 def Fisher_matrix(p, ffs, sigmas, priors=None):
     '''
@@ -55,6 +53,7 @@ def Fisher_matrix(p, ffs, sigmas, priors=None):
 
         return F + F_priors # adds priors to initial matrix
 
+
 def cov_matrix(F):
     '''
     Returns the covariance matrix of a model
@@ -65,7 +64,8 @@ def cov_matrix(F):
     # HRK edit ! return np.mat(F).I # inverse of the Fisher matrix
     #
     return np.asmatrix(F).I # inverse of the Fisher matrix
-    
+
+
 def unc(F):
     '''
     Returns the uncertainties of the model parameters
@@ -76,11 +76,12 @@ def unc(F):
     C = cov_matrix(F)
     return np.sqrt(abs(np.diag(C)))
 
+
 def rho(F, i, j):
     '''
     Returns the correlation coefficient between parameters i and j
 
-    F = Fisher matrix of the model
+    F    = Fisher matrix of the model
     i, j = indexes of the parameters for which to calculate the correlation coefficient
     '''
     
@@ -89,14 +90,14 @@ def rho(F, i, j):
 
     return rho
 
+
 def ellipse(F, i, j):
 
     '''
     Returns the axes and the angle from the x-axis of the confidence ellipse of parameters i and j
 
-    F = Fisher matrix of the model
-    i, j = indexes of the parameters for which to calculate the correlation coefficient
-    delta_chi2 = confidence interval of interest
+    F    = Fisher matrix of the model
+    i, j = indexes of the parameters for which to calculate the correlation coefficient´
     '''
 
     C = cov_matrix(F)
@@ -113,18 +114,20 @@ def ellipse(F, i, j):
     
     return np.sqrt(abs(ai2)), np.sqrt(abs(aj2)), angle
 
+
 def FoM(F, i, j, delta_chi2=2.3):
     '''
     Returns the Figure of Merit of p_i and p_j
 
-    F = Fisher matrix of the model
-    i, j = indexes of the parameters for which to calculate the correlation coefficient
+    F          = Fisher matrix of the model
+    i, j       = indexes of the parameters for which to calculate the correlation coefficient
     delta_chi2 = confidence interval of interest
     '''
 
     ai, aj = ellipse(F, i, j)[:2]
     
     return 1 / (ai * aj * delta_chi2)
+
 
 def draw_ellipse(F, i, j, delta_chi2=2.3, center=(0, 0), ax=None, **kwargs):
     '''
@@ -135,6 +138,7 @@ def draw_ellipse(F, i, j, delta_chi2=2.3, center=(0, 0), ax=None, **kwargs):
     delta_chi2 = confidence interval of interest
     **kwargs = specifications of the ellipse
     '''
+
     ai, aj, angle = ellipse(F, i, j)
     
     theta = np.linspace(0, 2*np.pi, 200) # ellipse

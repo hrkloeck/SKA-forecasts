@@ -41,7 +41,7 @@ N_ant_def  = 144                         # integer
 
 # === Plot colour image of significance of error estimates versus theoretical model (image dimension sky area (horizontal) and channel width (vertical)) ===
 #
-#dvplt.im_vsignificance(z_eg, Dnu_val[0], Dnu_val[-1], S_area_val[0], S_area_val[-1], t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def, N=100)
+#dvplt.im_vsignificance(z_eg, Dnu_val[0], Dnu_val[-1], S_area_val[0], S_area_val[-1], t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM)
 
 
 # === Plot diagram error estimates versus redshift per sky area  ===
@@ -50,17 +50,16 @@ N_ant_def  = 144                         # integer
 
 # === Plot diagram significance of error estimates/theoretical model versus redshift per sky area  ===
 #
-#dvplt.plot_vsignificance(z_val, Dnu_val, S_area_val, t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def)
-
+#dvplt.plot_vsignificance(z_val, Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM)
 
 # === Plot diagram theoretical model redshiftdrifts and uncertainties versus redshift per sky area  ===
 #
-#dvplt.plot_Dv(z_val, Dnu_val, S_area_val, t_obs_def, t_exp_def, p_LCDM, N_ant_def, fwhm_def)
+#dvplt.plot_Dv(z_val, Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM)
 
 
 # === Plot confidence ellipses  ===
 #
-dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_exp_def, p_LCDM, t_obs_def, N_ant_def, fwhm_def, priors_baseline, savefig=True)
+dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
 
 
 def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):

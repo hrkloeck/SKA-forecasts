@@ -9,10 +9,11 @@ def E(z, q0, j0):
     '''
     Returns the re-scaled Hubble parameter (dimensionless)
 
-    z = observed redshift
+    z  = observed redshift
     q0 = deceleration parameter
     j0 = jerk parameter
     '''
+
     a = (q0 + 1) * z
     b = 1/2 * (j0 - q0**2) * z**2
     return 1 + a + b
@@ -21,32 +22,35 @@ def Z1(z, q0, j0):
     '''
     Returns the first time derivative of the redshift (dimensionless)
 
-    z = observed redshift
+    z  = observed redshift
     q0 = deceleration parameter
     j0 = jerk parameter
     '''
+
     return 1 + z - E(z, q0, j0)
 
 def delta_v_func(z, p, t_exp):
     '''
     Returns the spectroscopic velocity shift [cm/s]
 
-    z = observed redshift
-    p = array of H0, q0 and j0 values
+    z     = observed redshift
+    p     = array of H0, q0 and j0 values
     t_exp = total experiment time (time span between observations) [yrs]
     '''
+
     H0, q0, j0 = p
     H0_s       = H0 / 3.08567758128e19 # km/s/Mpc to 1/s
     return c_light * H0_s * t_exp*365*24*3600 * Z1(z, q0, j0) / (1 + z)
 
 
 def relvelo(obsfreq):
-    """
+    '''
     Returns the relativistic velocity [cm/s]
     (equation 10-77 and 10-78a Kraus, Radio Astronomy)
 
     obsfreq = observed frequency [Hz]
-    """
+    '''
+
     z     = HI_freq/obsfreq -1.
     m     = (z + 1)**2
     rvelo = c_light * (m - 1)/(m + 1)  # cm/s
@@ -59,6 +63,7 @@ def Dnu2dv(Dnu,z):
 
     Dnu = channel width in frequency [Hz]
     '''
+    
     lower_freq = HI_freq/(z+1) - Dnu/2
     upper_freq = HI_freq/(z+1) + Dnu/2
     upper_v    = relvelo(lower_freq)
@@ -69,9 +74,7 @@ def Dnu2dv(Dnu,z):
 
 def sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm):
     '''
-    Returns the uncertainty in the 
- 
-    cosmological velocity drift  (sigma_v)
+    Returns the uncertainty sigma_v in the cosmological velocity drift [cm/s]
     
     z      = observed redshift
     t_obs  = observation time (per pointing) [s]
@@ -102,7 +105,7 @@ def sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm):
     #
     # HI profile at 20 percent level see Obreschow et al. 2009
     #
-    w20_HI_galaxy = 3.6 * p4 / np.sqrt(2)                         
+    w20_HI_galaxy = 3.6 * p4 * 1/np.sqrt(2)                         
     #
     # Essentially this factor scales the Dnu to a single
     # channel.

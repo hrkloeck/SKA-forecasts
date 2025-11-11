@@ -4,8 +4,9 @@ def SEFD(D_dish):
     '''
     Returns the SEFD of a dish [W m⁻² Hz⁻¹]
     
-    D_dish: diameter of the dish [m]
+    D_dish = diameter of the dish [m]
     '''
+
     kB       = 1.380649e-23 # J/K
     T_sys    = 23
     eta_dish = 1.
@@ -17,8 +18,9 @@ def S_rms_func(t_obs, N_ant, Dnu):
 
     t_obs = observation time (per pointing) [s]
     N_ant = total number of antennas
-    Dnu = channel width [Hz]
+    Dnu   = channel width [Hz]
     '''
+
     eta_sys = 1.
     n_13_5 = 64
     n_15 = N_ant - 64
