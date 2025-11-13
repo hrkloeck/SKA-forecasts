@@ -261,13 +261,15 @@ def plot_ellipses(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p, prio
             sigma_v = sigma_v_vect(z_val)
             delta_v = lambda p: delta_v_func(z_val, p, t_exp)
             F = Fisher_matrix(p, delta_v, sigma_v, priors)
+            fom = FoM(F, 1, 2)
             draw_ellipse(F, 1, 2, delta_chi2=2.3, center=(p[1], p[2]), ax=ax[i,j], label=r'1$\sigma$')
             draw_ellipse(F, 1, 2, delta_chi2=6.17, center=(p[1], p[2]), ax=ax[i,j], label=r'2$\sigma$')
             draw_ellipse(F, 1, 2, delta_chi2=11.8, center=(p[1], p[2]), ax=ax[i,j], label=r'3$\sigma$')
             ax[i,j].legend()
+            ax[i,j].text(-8, -40, f'FoM = {fom:.2f}')
 
     for i, a in enumerate(ax[:, 0]):
-        a.set_ylabel(f"$j_0$\n[Dnu = {Dnu_val[i]} Hz]")
+        a.set_ylabel(f"$j_0$\n[Dnu = {Dnu_val[i]} Hz]", fontsize=12)
     for j, a in enumerate(ax[0]):
         a.set_title(f"S_area = {S_area_val[j]} sq deg")
     for j, a in enumerate(ax[-1]):

@@ -59,7 +59,7 @@ N_ant_def  = 144                         # integer
 
 # === Plot confidence ellipses  ===
 #
-#dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline)
+dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
 
 
 def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
@@ -86,10 +86,13 @@ def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None)
 
 
 def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, ellipse=False, plotFoM=False): # t_obs in s, t_exp in yrs, Dnu in Hz, S_area in sq deg and fwhm in cm/s
-    z2 = np.array([.3, .5])
-    z3 = np.array([.1, .3, .5])
+    z1 = np.array([.3, .5])
+    z2 = np.array([.1, .3, .5])
+    z3 = np.array([.2, .3])
+    z4 = np.array([.3, .4])
+    z5 = np.array([.2, .3, .4])
 
-    z_bins  = [z2, z3]
+    z_bins  = [z1, z2, z3, z4, z5]
     F       = [analysis_FoM(z_i, t_obs/len(z_i), t_exp, N_ant, Dnu, S_area, fwhm, priors)[0] for z_i in z_bins]
     FoM     = [analysis_FoM(z_i, t_obs/len(z_i), t_exp, N_ant, Dnu, S_area, fwhm, priors)[1] for z_i in z_bins]
     unc     = [analysis_FoM(z_i, t_obs/len(z_i), t_exp, N_ant, Dnu, S_area, fwhm, priors)[2] for z_i in z_bins]
@@ -125,27 +128,30 @@ best_area   = best_values[0][1]
 
 
 #print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
-print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline, ellipse=True))
+#print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline, ellipse=True))
 
 
 #
 # === FoM plots ===
 #
 
-print('\n=== t_obs ===')
-t_obs_val = np.linspace(3600,3600*24,24)
-fom_val_t = [analysis(t_obs, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline, plotFoM=True) for t_obs in t_obs_val]
-plt.plot(t_obs_val, fom_val_t)
-plt.xlabel('t_obs [s]')
-plt.ylabel('FoM')
-plt.show()
+#print('\n=== t_obs ===')
+#t_obs_val = np.linspace(3600,3600*24,24)
+#fom_val_t = [analysis(t_obs, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline, plotFoM=True) for t_obs in t_obs_val]
+#plt.plot(t_obs_val, fom_val_t)
+#plt.xlabel('t_obs [s]')
+#plt.ylabel('FoM')
+#plt.show()
 
-print('\n=== N_ant ===')
-N_ant_val = np.arange(144,198)
-fom_val_N = [analysis(t_obs_def, t_exp_def, N_ant, best_dnu, best_area, fwhm_def, priors_baseline, plotFoM=True) for N_ant in N_ant_val]
-plt.plot(N_ant_val, fom_val_N)
-plt.xlabel('N_ant')
-plt.ylabel('FoM')
-plt.show()
+#print('\n=== N_ant ===')
+#N_ant_val = np.arange(144,198)
+#fom_val_N = [analysis(t_obs_def, t_exp_def, N_ant, best_dnu, best_area, fwhm_def, priors_baseline, plotFoM=True) for N_ant in N_ant_val]
+#plt.plot(N_ant_val, fom_val_N)
+#plt.xlabel('N_ant')
+#plt.ylabel('FoM')
+#plt.show()
 
+
+# SEE RELATION BETWEEN SIGMA_V, V_SIGNIFICANCE AND FOM
+# SEE WHICH REDSHIFT BINS TO TRY
 # ADD DOCSTRINGS
