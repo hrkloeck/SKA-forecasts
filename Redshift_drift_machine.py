@@ -59,7 +59,8 @@ N_ant_def  = 144                         # integer
 
 # === Plot confidence ellipses  ===
 #
-#dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
+#dvplt.plot_ellps_panel(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
+dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, 5000, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
 
 
 def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
@@ -127,7 +128,7 @@ best_dnu    = best_values[0][0]
 best_area   = best_values[0][1]
 
 
-print(hrk_analysis_results(np.array([.1, .3, .5]), t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors=priors_baseline))
+#print(hrk_analysis_results(np.array([.1, .3, .5]), t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors=priors_baseline))
 #print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
 #print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline, ellipse=True))
 

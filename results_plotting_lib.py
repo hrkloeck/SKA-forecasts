@@ -236,7 +236,7 @@ def im_vsignificance(z_eg, Dnu_min, Dnu_max, S_area_min, S_area_max, t_obs, t_ex
     plt.show()
 
 
-def plot_ellipses(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p, priors=None, savefig=False):
+def plot_ellps_panel(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p, priors=None, savefig=False):
     '''
     Creates a panel of confidence ellipses for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
 
@@ -277,6 +277,38 @@ def plot_ellipses(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p, prio
         a.set_xlabel(f"$\\mathbf{{q_0}}$")
 
     fig.tight_layout()
+    if savefig:
+        fig.savefig('ellipses_panel.png')
+    plt.show()
+
+
+def plot_ellipses(z_val, Dnu_val, S_area, t_obs, t_exp, N_ant, fwhm, p, priors=None, savefig=False):
+    '''
+    Creates a panel of confidence ellipses for different values of channel width and survey area (Dnu in the lines and S_area in the columns)
+
+    z_val      = values of redshift to calculate ∆v and sigma_v
+    Dnu_val    = values of channel width to plot [Hz]
+    S_area     = survey area to plot [sq deg]
+    t_obs      = observation time used to calculate sigma_v [s]
+    t_exp      = total experiment time used to calulate ∆v [yrs]
+    N_ant      = number of antennas used to calculate sigma_v
+    fwhm       = HI line width [cm/s]
+    p          = array of H0, q0, j0 values
+    priors     = array of the priors to be used (same length and order as p)
+    '''
+
+    fig, ax = plt.subplots()
+    for Dnu in Dnu_val:
+        sigma_v_vect = np.vectorize(lambda z_i: sigma_v_func(z_i, t_obs, N_ant, Dnu, S_area, fwhm))
+        sigma_v = sigma_v_vect(z_val)
+        delta_v = lambda p: delta_v_func(z_val, p, t_exp)
+        F = Fisher_matrix(p, delta_v, sigma_v, priors)
+        fom = FoM(F, 1, 2)
+        draw_ellipse(F, 1, 2, delta_chi2=2.3, center=(p[1], p[2]), ax=ax, label=f'{Dnu} Hz (FoM = {fom:.2f})')
+    ax.legend()
+    ax.set_xlabel(r"$q_0$", fontsize=12)
+    ax.set_ylabel(r"$j_0$", fontsize=12)
+
     if savefig:
         fig.savefig('ellipses.png')
     plt.show()
