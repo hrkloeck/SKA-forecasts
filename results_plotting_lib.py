@@ -39,7 +39,6 @@ def plot_Nz(z_val, Dnu_val, S_area_val, t_obs, N_ant):
 
     fig.tight_layout()
     plt.show()
-    print()
 
 
 def plot_sigmav(z_val, Dnu_val, S_area_val, t_obs, N_ant, fwhm):
@@ -249,6 +248,7 @@ def plot_ellps_panel(z_val, Dnu_val, S_area_val, t_obs, t_exp, N_ant, fwhm, p, p
     fwhm       = HI line width [cm/s]
     p          = array of H0, q0, j0 values
     priors     = array of the priors to be used (same length and order as p)
+    savefig    = save the panel as PNG
     '''
     
     n = len(Dnu_val)
@@ -295,6 +295,7 @@ def plot_ellipses(z_val, Dnu_val, S_area, t_obs, t_exp, N_ant, fwhm, p, priors=N
     fwhm       = HI line width [cm/s]
     p          = array of H0, q0, j0 values
     priors     = array of the priors to be used (same length and order as p)
+    savefig    = save ellipses as PNG
     '''
 
     fig, ax = plt.subplots()

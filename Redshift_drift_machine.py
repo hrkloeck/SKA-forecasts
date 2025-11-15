@@ -59,11 +59,21 @@ N_ant_def  = 144                         # integer
 
 # === Plot confidence ellipses  ===
 #
-dvplt.plot_ellps_panel(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
-dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, 5000, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline, savefig=True)
+dvplt.plot_ellps_panel(np.array([0.1, 0.3, 0.5]), Dnu_val, S_area_val, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline)
+dvplt.plot_ellipses(np.array([0.1, 0.3, 0.5]), Dnu_val, 5000, t_obs_def, t_exp_def, N_ant_def, fwhm_def, p_LCDM, priors_baseline)
 
 
 def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
+    '''Returns the Fisher matrix, FoM between q0 and j0, parameter constraints, expected drifts and their uncertainties
+    
+    z      = array of redshift bins
+    t_obs  = observation time [s]
+    t_exp  = total experiment time [yrs]
+    N_ant  = number of antennas
+    Dnu    = channel width [Hz]
+    S_area = survey area [sq deg]
+    fwhm   = HI line width [cm/s]
+    priors = array of priors for H0, q0, j0'''
     
     sigma_v_vect = np.vectorize(lambda z_i: dvlib.sigma_v_func(z_i, t_obs, N_ant, Dnu, S_area, fwhm))
     sigma_v = sigma_v_vect(z)
@@ -71,10 +81,20 @@ def analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
 
     F = fmlib.Fisher_matrix(p_LCDM, delta_v, sigma_v, priors)
     
-    return F, fmlib.FoM(F, 1, 2), fmlib.unc(F), delta_v(p_LCDM), sigma_v # Fisher Matrix, Figure of Merit between q0 and j0 and uncertainties
+    return F, fmlib.FoM(F, 1, 2), fmlib.unc(F), delta_v(p_LCDM), sigma_v
 
 
-def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None): # t_obs in s, t_exp in yrs, Dnu in Hz, S_area in sq deg and fwhm in cm/s
+def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None):
+    '''Returns analysis information (expected drifts, their uncertainties, FoM and parameter constraints) for the input setup
+    
+    z      = array of redshift bins
+    t_obs  = observation time [s]
+    t_exp  = total experiment time [yrs]
+    N_ant  = number of antennas
+    Dnu    = channel width [Hz]
+    S_area = survey area [sq deg]
+    fwhm   = HI line width [cm/s]
+    priors = array of priors for H0, q0, j0'''
 
     FMANA   = analysis_FoM(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors)
     FoM     = FMANA[1]
@@ -85,15 +105,29 @@ def hrk_analysis_results(z, t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None)
     return f'\n=== Analysis ===\nPriors: {priors}\nRedshift: {z}\nDnu: {Dnu}\nS_area: {S_area}\nExpected drift: {delta_v}\nMeasured Error: {sigma_v}\nFigure of Merit: {FoM} \nUncertainties of H0, q0, j0: {unc}'
 
 
-def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, ellipse=False, rtrnFoM=False): # t_obs in s, t_exp in yrs, Dnu in Hz, S_area in sq deg and fwhm in cm/s
+def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, ellipse=False, rtrnFoM=False):
+    '''Returns analysis information (optimzed redshift bins, expected drifts, their uncertainties, FoM and parameter constraints) for the input setup
+    If rtrnFoM=True, it returns the optimized FoM instead
+    If ellipse=True, it also plots the optimized confidence ellipse
+    
+    t_obs  = observation time [s]
+    t_exp  = total experiment time [yrs]
+    N_ant  = number of antennas
+    Dnu    = channel width [Hz]
+    S_area = survey area [sq deg]
+    fwhm   = HI line width [cm/s]
+    priors = array of priors for H0, q0, j0
+    ellipse = plot the confidence ellipse'''
+    
     z1 = np.array([.3, .5])
     z2 = np.array([.1, .3, .5])
     z3 = np.array([.2, .3, .4])
     z4 = np.array([.2, .3, .4, .5])
-    z5 = np.array([0.25,0.3,0.35,0.4])
-    z6 = np.array([0.2,0.25,0.3,0.35,0.4,0.45,0.5])
+    #z5 = np.array([0.25,0.3,0.35,0.4])
+    #z6 = np.array([0.2,0.25,0.3,0.35,0.4,0.45,0.5])
+    # Still to confirm which bins will be tested
 
-    z_bins  = [z1, z2, z3, z4, z5, z6]
+    z_bins  = [z1, z2, z3, z4]#, z5, z6]
     F       = [analysis_FoM(z_i, t_obs/len(z_i), t_exp, N_ant, Dnu, S_area, fwhm, priors)[0] for z_i in z_bins]
     FoM     = [analysis_FoM(z_i, t_obs/len(z_i), t_exp, N_ant, Dnu, S_area, fwhm, priors)[1] for z_i in z_bins]
     unc     = [analysis_FoM(z_i, t_obs/len(z_i), t_exp, N_ant, Dnu, S_area, fwhm, priors)[2] for z_i in z_bins]
@@ -128,7 +162,7 @@ best_dnu    = best_values[0][0]
 best_area   = best_values[0][1]
 
 
-#print(hrk_analysis_results(np.array([.1, .3, .5]), t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors=priors_baseline))
+print(hrk_analysis_results(np.array([.1, .3, .5]), t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors=priors_baseline))
 #print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def))
 #print(analysis(t_obs_def, t_exp_def, N_ant_def, best_dnu, best_area, fwhm_def, priors_baseline, ellipse=True))
 
@@ -152,8 +186,3 @@ best_area   = best_values[0][1]
 #plt.xlabel('N_ant')
 #plt.ylabel('FoM')
 #plt.show()
-
-
-# SEE RELATION BETWEEN SIGMA_V, V_SIGNIFICANCE AND FOM
-# SEE WHICH REDSHIFT BINS TO TRY
-# ADD DOCSTRINGS
