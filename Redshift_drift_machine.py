@@ -129,7 +129,7 @@ def analysis(t_obs, t_exp, N_ant, Dnu, S_area, fwhm, priors=None, ellipse=False,
 # === First attempt to do the analyis ===
 #
 
-best_values = dvplt.im_sigmav(z_eg, Dnu_val, S_area_val, t_obs_def, N_ant_def, fwhm_def, doplot=False)
+best_values = dvplt.im_sigmav(z_eg, Dnu_val, S_area_val, t_obs_def, N_ant_def, fwhm_def, delta_z,doplot=False)
 
 best_dnu    = best_values[0][0]
 best_area   = best_values[0][1]
