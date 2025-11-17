@@ -72,7 +72,7 @@ def Dnu2dv(Dnu,z):
     return dv
 
 
-def sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm):
+def sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm, delta_z):
     '''
     Returns the uncertainty sigma_v in the cosmological velocity drift [cm/s]
     
@@ -124,7 +124,7 @@ def sigma_v_func(z, t_obs, N_ant, Dnu, S_area, fwhm):
     # single channel detection
     #
     rms                                 = S_rms_func(t_obs, N_ant, Dnu) * Single_channel_detection_factor
-    N_galaxies, Minimum_peak_Amplitude  = N_func(z, rms, S_area)
+    N_galaxies, Minimum_peak_Amplitude  = N_func(z, rms, S_area, delta_z)
 
     # Error on the line center parameter of a pure Gaussian will 
     # be used to estimate the accuray of determine the
